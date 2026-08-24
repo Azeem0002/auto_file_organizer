@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Callable
-from platformdirs import PlatformDirs
 from pathlib import Path
 from enum import Enum
 from datetime import datetime
 
+from platformdirs import PlatformDirs
 
 
 class ValidationError(Exception):
@@ -65,11 +65,11 @@ class AppConfig:
     backup_retry_attempts: int = 2    
 
 APP_CONFIG = AppConfig()
-APP_DIRS = PlatformDirs(APP_CONFIG.app_name, APP_CONFIG.app_author)
 MAX_FILES = APP_CONFIG.max_files
+APP_DIRS = PlatformDirs(APP_CONFIG.app_name, APP_CONFIG.app_author)
 BACKUP_DIR = Path(APP_DIRS.user_data_dir) / "backups"
 LOG_DIR = Path(APP_DIRS.user_log_dir)
-STATE_DIR = Path(APP_DIRS.user_state_dir)
+STATE_DIR = Path(APP_DIRS.user_state_dir)  # Persist crash recovery state
 ORGANIZE_STATE_PATH = STATE_DIR / "organize_state.json"
 
 
@@ -87,19 +87,29 @@ class FileInfo:
     suffix: str
     category: str
     size: int = 0
-    permission: int | None = None
-    created: datetime | None = None
+    mode: int | None = None
     modified: datetime | None = None
 
 
+@dataclass
+class OrganizeOperationState:
+    source_dir: str
+    conflict_strategy: str
+    recursive: bool
+    max_files: int
+    started_at: str
+    completed_paths: list[str] = field(default_factory= list[str])
+
+# 
 @dataclass(frozen=True)
-class OrganizeFileInput:
+class OrganizeFilesInput:
     source_dir: Path
     dry_run: bool = True
     conflict_strategy: ConflictStrategy = ConflictStrategy.SKIP
     recursive: bool = False
     max_files = MAX_FILES
     backup: bool = False
+    custom_mapping: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -108,17 +118,10 @@ class OrganizationResult:
     skipped: int = 0
     conflicts: int = 0
     errors: int = 0
-    created_categories: int = 0
+    created_categories_count: int = 0
     operations: list[tuple[Path, Path]] = field(default_factory= list) 
     discovered_categories: set[str] = field(default_factory= set)
 
-
-@dataclass
-class BackupCommandInput:
-    source_dir: Path
-    backup_dir: Path = BACKUP_DIR
-    compress: bool = True
-    compression_format: str = "zip"
 
 @dataclass(frozen=True)
 class DirectoryAnalysis:
@@ -132,10 +135,8 @@ class DirectoryAnalysis:
 
 
 @dataclass
-class OrganizationOperationState:
-    source_dir: str
-    conflict_strategy: str
-    recursive: bool
-    max_files: int
-    started_at: str
-    completed_paths: list[str] = field(default_factory= list[str])
+class BackupCommandInput:
+    source_dir: Path
+    backup_dir: Path = BACKUP_DIR
+    compress: bool = True
+    compression_format: str = "zip"

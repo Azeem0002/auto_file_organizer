@@ -3,8 +3,10 @@ import time
 from pathlib import Path
 from functools import partial
 
-from models import Validated, ValidationError, ConflictStrategy
+from ..models.models import Validated, ValidationError, ConflictStrategy
 
+
+#### Validators ####
 def validate_path_exists(path: Path)-> Validated[Path]:
 
     if not path.exists():
@@ -77,6 +79,8 @@ def validate_is_writable_secure(path: Path)-> Validated[Path]:
         return Validated(None,[ValidationError(f"parent doesn't exist: {path}")])
     return validate_is_writable_secure(parent)
 
+
+##### Parsers #####
 def parse_source_dir_secure(path: Path, max_files: int = 10000)-> Validated[Path]:
 
     check_file_limit = partial(validate_file_count, max_files = max_files)
@@ -128,6 +132,4 @@ def parse_conflict_strategy(value: str)-> Validated[ConflictStrategy]:
     except ValueError:
         return Validated(None, [ValidationError(f"Invalid value. Choose from {valid_options}")])
     except (TypeError, AttributeError):
-        return Validated(None, [ValidationError(f"Invalid input. Choose from {valid_options}")])
-
-    
+        return Validated(None, [ValidationError(f"Invalid input. Choose from {valid_options}")])    
