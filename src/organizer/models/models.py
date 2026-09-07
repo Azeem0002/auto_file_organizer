@@ -1,9 +1,10 @@
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Callable
 from pathlib import Path
-from enum import Enum
+from enum import StrEnum
 from datetime import datetime
 
 from platformdirs import PlatformDirs
@@ -73,7 +74,7 @@ STATE_DIR = Path(APP_DIRS.user_state_dir)  # Persist crash recovery state
 ORGANIZE_STATE_PATH = STATE_DIR / "organize_state.json"
 
 
-class ConflictStrategy(Enum):
+class ConflictStrategy(StrEnum):
     SKIP = "skip"
     RENAME = "rename"
     OVERWRITE = "overwrite"
@@ -100,7 +101,7 @@ class OrganizeOperationState:
     started_at: str
     completed_paths: list[str] = field(default_factory= list[str])
 
-# 
+
 @dataclass(frozen=True)
 class OrganizeFilesInput:
     source_dir: Path
@@ -133,8 +134,17 @@ class DirectoryAnalysis:
     def categories(self)-> list[str]:
         return sorted(self.category_counts)
 
+dataclass(frozen=True)
+class DiskSpacePolicy:
+    backup_buffer_percent: int
+    minimum_free_percent: int
+    low_space_warning_percent: int
+    maximum_exact_count: int
+    maximum_backup_files: int
+    fast_estimate_sample_size: int
+    
 
-@dataclass
+@dataclass(frozen=True)
 class BackupCommandInput:
     source_dir: Path
     backup_dir: Path = BACKUP_DIR

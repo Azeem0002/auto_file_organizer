@@ -49,6 +49,12 @@ def _get_frontend_contract() -> dict:
             "dry-run versus execute mode clearly before confirmation",
             "backup success or failure and the available next action",
         ],
+        "billing_configuration": {
+            "default_plan_file": "billing_plans.json",
+            "override_environment_variable": "ORGANIZER_BILLING_CONFIG",
+            "subscription_store_override": "ORGANIZER_SUBSCRIPTION_STORE",
+            "rule": "Edit plan prices and max_files_per run in configuration; do nit change python source for commercial limits."
+        }
     }
 
 def get_frontend_contract()-> dict:

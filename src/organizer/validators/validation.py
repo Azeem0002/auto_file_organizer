@@ -1,5 +1,4 @@
-import os
-import time
+
 from pathlib import Path
 from functools import partial
 
@@ -35,19 +34,11 @@ def validate_file_count(dir: Path, max_files)-> Validated[Path]:
                     return Validated(None, [ValidationError(f"Cannot Exceed {max_files} files")])
         return Validated(dir)
     except OSError as e:
-        return Validated(None, [ValidationError(f"Cannot access directory: {e}")])
+        return Validated(None, [ValidationError(f"Cannot access directory: {str(e)}")])
 
 
-def validate_within_base(path: Path, base_dir: Path)-> Validated[Path]:
-    try:
-        resolved = path.resolve()
-        if not resolved.is_relative_to(base_dir):
-            return Validated(None, [ValidationError(f"Path is outside the allowed area: {path}")])
-        return Validated(resolved)
-    except (OSError, RuntimeError) as e:
-        return Validated(None, [ValidationError(f"Invalid path: {e}")])
 
-def validate_not_symlink(path: Path)-> Validated[Path]:
+def validate_not_symlinks(path: Path)-> Validated[Path]:
 
     current = path
     while current != current.parent:
@@ -80,12 +71,26 @@ def validate_is_writable_secure(path: Path)-> Validated[Path]:
     return validate_is_writable_secure(parent)
 
 
+def validate_within_base(path: Path, base_dir: Path)-> Validated[Path]:
+    try:
+        resolved = path.resolve()
+        if not resolved.is_relative_to(base_dir):
+            return Validated(None, [ValidationError(f"Path is outside the allowed area: {path}")])
+        return Validated(resolved)
+    except (OSError, RuntimeError) as e:
+        return Validated(None, [ValidationError(f"Invalid path: {e}")])
+
+def validate_within_home(path: Path)-> Validated:
+    return validate_within_base(path, path.home())
+
+
 ##### Parsers #####
 def parse_source_dir_secure(path: Path, max_files: int = 10000)-> Validated[Path]:
 
-    check_file_limit = partial(validate_file_count, max_files = max_files)
+    check_file_limit = partial(validate_file_count, max_files=max_files)
     return (
-        validate_within_base(path, path.home())
+        validate_not_symlinks(path)
+        .bind(validate_within_home)
         .bind(validate_path_exists)
         .bind(validate_is_dir)
         .bind(validate_is_readable)
