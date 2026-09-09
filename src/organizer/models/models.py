@@ -110,7 +110,7 @@ class OrganizeFilesInput:
     recursive: bool = False
     max_files = MAX_FILES
     backup: bool = False
-    custom_mapping: dict[str, str] = field(default_factory=dict)
+    custom_map: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
