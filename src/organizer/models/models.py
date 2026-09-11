@@ -116,8 +116,10 @@ class OrganizeFilesInput:
 @dataclass
 class OrganizationResult:
     organized: int = 0
-    skipped: int = 0
     conflicts: int = 0
+    skipped: int = 0
+    overwritten: int = 0
+    deleted: int = 0
     errors: int = 0
     created_categories_count: int = 0
     operations: list[tuple[Path, Path]] = field(default_factory= list) 

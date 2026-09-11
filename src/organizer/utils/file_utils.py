@@ -67,3 +67,4 @@ def extract_file_category(file_path: Path, custom_map: dict[str, str] | None= No
     if not category or category.isspace():
         return "misc"
     return category.strip()
+

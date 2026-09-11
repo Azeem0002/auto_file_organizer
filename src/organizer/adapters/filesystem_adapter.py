@@ -1,6 +1,6 @@
 
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from ..models.models import FileInfo, ValidationError
@@ -25,7 +25,7 @@ def gather_file_metadata(file_path: Path, custom_map: dict[str, str] | None =Non
         category=extract_file_category(file_path, custom_map),
         size=stat.st_size,
         mode=stat.st_mode,
-        modified=datetime.fromtimestamp(stat.st_mtime)
+        modified=datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
     )
 
 def generate_unique_filename(target_path: Path, max_attempts: int= 1000)-> Path:
