@@ -9,7 +9,25 @@ A local command-line tool that analyzes files and organizes them into category f
 
 ## Install
 
-From the project directory, install the project and its dependencies:
+### Install from GitHub
+
+Clone the repository, enter the project directory, and install the project and its dependencies with `uv`:
+
+```sh
+git clone https://github.com/Azeem0002/auto_file_organizer.git
+cd auto_file_organizer
+uv sync
+```
+
+This creates the project's `.venv`. Check the available commands:
+
+```sh
+uv run python -m organizer --help
+```
+
+### Install from a local checkout
+
+If you already have the repository, run these commands from its directory:
 
 ```sh
 uv sync
